@@ -1,0 +1,23 @@
+resource_registry:
+  OS::TripleO::Services::trilio: /home/stack/shyam/templates/trilio/trilio.yaml
+
+parameter_defaults:
+   NFSShares: ''
+   NfsOptions: ''
+   TvaultApplianceIP: ''
+   NovaConfFile: '/etc/nova/nova.conf'
+   NovaDistConfFile: '/usr/share/nova/nova-dist.conf'
+   NovaComputeFiltersFile: '/usr/share/nova/rootwrap/compute.filters'
+
+   ContegoConfFileContent: | 
+      [DEFAULT]
+      vault_storage_nfs_export = ${NFS_SHARES}
+      vault_storage_nfs_options = ${NFS_OPTIONS}
+      vault_storage_type = nfs
+      vault_data_directory_old = /var/triliovault
+      vault_data_directory = /var/triliovault-mounts
+      log_file = /var/log/nova/tvault-contego.log
+      debug = False
+      verbose = True
+      max_uploads_pending = 3
+      max_commit_pending = 3
