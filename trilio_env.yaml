@@ -1,10 +1,10 @@
 resource_registry:
-  OS::TripleO::Services::trilio: /home/stack/shyam/templates/trilio/trilio.yaml
+  OS::TripleO::Services::trilio: /home/stack/trilio/trilio.yaml
 
 parameter_defaults:
-   NFSShares: ''
-   NfsOptions: ''
-   TvaultApplianceIP: ''
+   NFSShares: '192.168.1.1:/exports/'
+   NfsOptions: 'rw'
+   TvaultApplianceIP: '192.168.22.22'
    NovaConfFile: '/etc/nova/nova.conf'
    NovaDistConfFile: '/usr/share/nova/nova-dist.conf'
    NovaComputeFiltersFile: '/usr/share/nova/rootwrap/compute.filters'
