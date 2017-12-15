@@ -26,7 +26,7 @@ parameters:
     default: ''
     description: Provide comma separated list of NFS shares to use as backup target
     type: string
-  TVAULTApplianceIP:
+  TvaultApplianceIP:
     default: ''
     description: Provide TrilioVault appliance IP address which is reachable from all compute nodes and controller node
     type: string
@@ -37,7 +37,7 @@ outputs:
     value:
       service_name: tvault-contego
       config_settings:
-        trilio::nfs_shares:{get_param: NFSShares} 
-        trilio::tvault_appliance_ip: {get_param: TVAULTApplianceIP }
+        trilio::nfs_shares: {get_param: NFSShares} 
+        trilio::tvault_appliance_ip: {get_param: TvaultApplianceIP }
       step_config: |
         include ::tripleo::profile::base::trilio
