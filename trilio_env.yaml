@@ -2,22 +2,18 @@ resource_registry:
   OS::TripleO::Services::trilio: /home/stack/trilio/trilio.yaml
 
 parameter_defaults:
+
+   ##Edit following parameters to set correct NFS share of your environment
+   ##This share will act as backup target for triliovault backups, should be accessible from all compute nodes and triliovault vm
    NFSShares: '192.168.1.1:/exports/'
    NfsOptions: 'rw'
+
+   ##Edit following parameter to set real triliovault VM IP address from your environment
+   ##You are supposed to launch a triliovault VM before executing these scripts
    TvaultApplianceIP: '192.168.22.22'
+
+   ##Edit following parameters only if you are using non-default locations for nova configuration files,
+   ##Otherwise just keep them as it is
    NovaConfFile: '/etc/nova/nova.conf'
    NovaDistConfFile: '/usr/share/nova/nova-dist.conf'
    NovaComputeFiltersFile: '/usr/share/nova/rootwrap/compute.filters'
-
-   ContegoConfFileContent: | 
-      [DEFAULT]
-      vault_storage_nfs_export = ${NFS_SHARES}
-      vault_storage_nfs_options = ${NFS_OPTIONS}
-      vault_storage_type = nfs
-      vault_data_directory_old = /var/triliovault
-      vault_data_directory = /var/triliovault-mounts
-      log_file = /var/log/nova/tvault-contego.log
-      debug = False
-      verbose = True
-      max_uploads_pending = 3
-      max_commit_pending = 3

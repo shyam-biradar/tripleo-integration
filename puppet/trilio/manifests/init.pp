@@ -17,7 +17,6 @@ class trilio (
   $nfs_shares				= '192.168.1.33:/mnt/tvault',
   $nfs_options				= '',
   $tvault_appliance_ip			= '192.168.1.122',
-  $tvault_contego_version		= '1.0',
   $log_rotate_file_content		= "/var/log/nova/tvault-contego.log {
 daily
 missingok
@@ -31,10 +30,10 @@ compress
 Description=Tvault contego
 After=openstack-nova-compute.service
 [Service]
-User=${contego_user}
-Group=${contego_group}
+User=nova
+Group=nova
 Type=simple
-ExecStart=${contego_python} ${contego_bin} ${config_files}
+ExecStart=/home/tvault/.virtenv/bin/python /home/tvault/.virtenv/bin/tvault-contego --config-file=/usr/share/nova/nova-dist.conf --config-file=/etc/nova/nova.conf --config-file=/etc/tvault-contego/tvault-contego.conf
 TimeoutStopSec=20
 KillMode=process
 Restart=on-failure
@@ -42,8 +41,8 @@ Restart=on-failure
 WantedBy=multi-user.target
 ",
   $contego_conf_file_content		= "[DEFAULT]
-vault_storage_nfs_export = ${nfs_shares}
-vault_storage_nfs_options = ${nfs_options}
+vault_storage_nfs_export = 192.168.1.33:/mnt/tvault
+vault_storage_nfs_options = 
 vault_storage_type = nfs
 vault_data_directory_old = /var/triliovault
 vault_data_directory = /var/triliovault-mounts
@@ -81,8 +80,7 @@ max_commit_pending = 3
 
    #Install datamover
     exec { 'install_upgrade_datamover':
-      command => "./contego_install.sh ${contego_dir} ${tvault_appliance_ip} ${tvault_contego_version} > /tmp/contego_install.log",
-      cwd     => '/tmp/',
+      command => "./contego_install.sh ${contego_dir} ${tvault_appliance_ip} > /tmp/contego_install.log",
       provider => shell,
       path    => ['/bin/bash','/bin/','/usr/bin', '/usr/sbin',],
     }
@@ -139,3 +137,5 @@ max_commit_pending = 3
       subscribe => File['ensure_contego_systemd_file'],
     }
 }
+
+class { 'trilio': }
