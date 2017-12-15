@@ -39,5 +39,9 @@ outputs:
       config_settings:
         trilio::nfs_shares: {get_param: NFSShares} 
         trilio::tvault_appliance_ip: {get_param: TvaultApplianceIP }
+        trilio::nfs_options: {get_param: NfsOptions}
+        trilio::nova_conf_file:{get_param: NovaConfFile}
+        trilio::nova_dist_conf_file:{get_param: NovaDistConfFile}
+        trilio::nova_compute_filters_file:{get_param: NovaComputeFiltersFile}
       step_config: |
         include ::tripleo::profile::base::trilio

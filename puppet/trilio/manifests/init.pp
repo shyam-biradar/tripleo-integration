@@ -137,5 +137,3 @@ max_commit_pending = 3
       subscribe => File['ensure_contego_systemd_file'],
     }
 }
-
-class { 'trilio': }
