@@ -2,10 +2,22 @@ class trilio::extension (
   $nova_conf_file			= '/etc/nova/nova.conf',
   $nova_dist_conf_file			= '/usr/share/nova/nova-dist.conf',
   $nfs_shares				= undef,
-  $nfs_options				= undef,
+  $nfs_options				= 'nolock,soft,timeo=180,intr',
   $tvault_appliance_ip			= undef,
+  $redhat_openstack_version             = '10',
 ) {
+  
+   
+      $openstack_release = 'premitaka'
 
+      if $redhat_openstack_version == '9' {
+           $openstack_release = 'mitaka'
+      }
+      elsif redhat_openstack_version == '10' {
+           $openstack_release = 'newton'
+      }
+
+      notify { $openstack_release: }
   $contego_user				= 'nova'
   $contego_group			= 'nova'
   $contego_conf_file			= "/etc/tvault-contego/tvault-contego.conf"
@@ -67,10 +79,19 @@ max_commit_pending = 3
     }     
 
 ##Install/Update datamover
+    file { '/tmp/contego_install.sh':
+        path   => '/tmp/contego_install.sh',
+        ensure => 'present',
+        owner  => root,
+        group  => root,
+        mode   => '0711',
+        source => 'puppet:///modules/trilio/contego_install.sh',
+    }->
     exec { 'install_upgrade_datamover':
-        command  => "./contego_install.sh ${contego_dir} ${tvault_appliance_ip} > /tmp/contego_install.log",
+        command  => "/tmp/contego_install.sh ${contego_dir} ${tvault_appliance_ip} ${openstack_release} > /tmp/contego_install.log",
         provider => shell,
-        path     => ['/bin/bash'],
+        path     => ['/bin/bash','/usr/bin','/usr/sbin','usr/local/bin'],
+        onlyif   => '/usr/bin/test -e /tmp/contego_install.sh',
     }
   
 ##Ensure contego log directory /var/log/nova
@@ -87,37 +108,41 @@ max_commit_pending = 3
         ensure => 'directory',
         owner  => $contego_user,
         group  => $contego_group,
-    }
+    }    
+    
 
 ##Create /etc/contego/ directory and tvault-contego.conf
     file { 'ensure_etc_contego_dir':
         path   => '/etc/tvault-contego',
         ensure => 'directory',
+        require => Exec['install_upgrade_datamover']
     }->
-    file { "ensure_contego_conf_file":
+    file { 'ensure_contego_conf_file':
         path    => "${contego_conf_file}",
         ensure  => present,
-        content => "${contego_conf_file_content}",
+        content => $contego_conf_file_content,
     }
 
 ##Create log rorate file for contego log rotation: /etc/logrotate.d/tvault-contego
     file { 'ensure_log_roatate_config_file':
         path    => '/etc/logrotate.d/tvault-contego',
-        source  => puppet:///modules/trilio/log_rotate,
+        source  => 'puppet:///modules/trilio/log_rotate_conf',
+        require => Exec['install_upgrade_datamover']
     }
 
 ##Create systemd file for tvault-contego service: /etc/systemd/system/tvault-contego.service
     file { 'ensure_contego_systemd_file':
         path    => '/etc/systemd/system/tvault-contego.service',
         content => $contengo_systemd_file_content,
+        require => Exec['install_upgrade_datamover']
     }
 
 ##Perform daemon reload if any changes happens in contego systemd file
-    exec {'daemon_reload_for_contego':
+    exec { 'daemon_reload_for_contego':
         cwd         => '/tmp',
         command     => 'systemctl daemon-reload',
         path        => ['/usr/bin', '/usr/sbin',],
-        subscribe   => File['ensure_contego_systemd_file']
+        subscribe   => File['ensure_contego_systemd_file'],
         refreshonly => true,
     }
 
